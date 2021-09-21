@@ -35,21 +35,24 @@ graphene = kwant.lattice.general([[1, 0], [0, np.sqrt(3)]],  # lattice vectors
                                  [[0, 1/(2*np.sqrt(3))], [0, np.sqrt(3)/2], [1/2, 2/(np.sqrt(3))], 
                                   [1/2, 0]],norbs = 2)  # Coordinates of the sites
 
+rounded_height = round(H/np.sqrt(3))*np.sqrt(3)
+lead_height = round(H/(2*np.sqrt(3)))*np.sqrt(3)
+
 def square(pos):
     x, y = pos
-    return x >= 0 and y >=0 and x < W and y < round(H/np.sqrt(3))*np.sqrt(3)
+    return x >= 0 and y >= 0              and x < W and y < rounded_height
 def side_leads(pos):
     x, y = pos
-    return x >= 0 and y >= round(H/(2*np.sqrt(3)))*np.sqrt(3) and x < W and y < round(H/np.sqrt(3))*np.sqrt(3)
+    return x >= 0 and y >= lead_height    and x < W and y < rounded_height
 
 def create_junction( t, on_site, mu_scattering, mu_n, mu_p, mu_S, Delta ):
 
     def pn_junction(site):
         x, y = site.pos
-        if  (y >  H/2):
+        if  (y > lead_height ):
             return - mu_scattering  * tau_z
         else:
-            return - (mu_p-(mu_p-mu_scattering)*y/(H/2)) * tau_z
+            return - (mu_p-(mu_p-mu_scattering)*y/lead_height) * tau_z
     
     sys = kwant.Builder(conservation_law=-tau_z, particle_hole = tau_y)
     sys[graphene.shape(square, (0,0))] =  pn_junction
@@ -86,7 +89,7 @@ junction = create_junction(t=t, on_site = 0, mu_scattering=mu_scattering, mu_n=m
 
 T_11, T_11A, T_12, T_12A, T_13, T_13A = [],[],[],[],[],[]
 for en in energy:
-    smatrix  = kwant.smatrix(junction.finalized() , en)
+    smatrix  = kwant.smatrix(junction.finalized() , en, check_hermiticity = True)
     T_11.append(  smatrix.transmission((0,0), (0,0)))
     T_11A.append( smatrix.transmission((0,0), (0,1)))
     T_12.append(  smatrix.transmission((0,0), (2,0)))
@@ -96,8 +99,8 @@ for en in energy:
 
 pyplot.figure(figsize=(10,10))
 #pyplot.subplot(2,2,1)
-pyplot.plot(energy, T_11 ,"r-")
-pyplot.plot(energy, T_11A,"b-")
+pyplot.plot(energy, T_12 ,"r-")
+pyplot.plot(energy, T_12A,"b-")
 pyplot.plot(energy, T_13 ,color="darkorange",linestyle="-")
 pyplot.plot(energy, T_13A,"c-")
 pyplot.plot([-mu_n, -mu_n],[0,max(T_13)],"b:");
@@ -109,11 +112,11 @@ if( supra_ok ):
 pyplot.title("W="+str(W)+", H="+str(H)+", $\mu_{scatt.}$="+str(mu_scattering)+", $\mu_N$="+str(mu_n)+", $\mu_P$="+str(mu_p)+", $\Delta$="+str(Delta),fontsize=18);
 pyplot.xlabel("$E\;[eV]$",fontsize=18)
 pyplot.ylabel("$T$",fontsize=18)
-pyplot.legend(["$T_{11}$","$T_{11A}$","$T_{13}$","$T_{13A}$","$\mu_N$","$\mu_P$","$\Delta$"],fontsize=18);
+pyplot.legend(["$T_{12}$","$T_{12A}$","$T_{13}$","$T_{13A}$","$\mu_N$","$\mu_P$","$\Delta$"],fontsize=18);
 pyplot.xticks(fontsize=18); pyplot.yticks(fontsize=18);
 pyplot.savefig("T_"+"_".join(sys.argv[1:])+".png");  
 
-with open("/home/wyuevmf/kwant/graphene_pn_multi/"+"T_"+"_".join(sys.argv[1:])+".npy",'wb') as file:
+with open("./T_"+"_".join(sys.argv[1:])+".npy",'wb') as file:
     np.save(file,[energy,T_11,T_11A,T_12,T_12A,T_13,T_13A])
 
 print("CORES:"+str(multiprocessing.cpu_count()))
