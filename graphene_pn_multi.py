@@ -27,6 +27,7 @@ mu_n = mu_scattering
 mu_S = 3      
 t    = -3/s_f
 phi  = np.pi
+t_s  = -3
 
 tau_x = tinyarray.array([[0, 1], [1, 0]])
 tau_y = tinyarray.array([[0, -1j], [1j, 0]])
@@ -71,7 +72,7 @@ def create_junction( t, on_site, mu_scattering, mu_n, mu_p, mu_S, Delta ):
     
     superL = kwant.Builder(kwant.TranslationalSymmetry([0, +np.sqrt(3)]), conservation_law=-tau_z, particle_hole=tau_y)
     superL[graphene.shape(square, (0,0))] = ( - mu_S ) * tau_z + np.exp(phi*1j) * Delta * tau_x
-    superL[graphene.neighbors()] = -t * tau_z    
+    superL[graphene.neighbors()] = -t_s * tau_z    
         
     #kwant.plotter.bands(negativeL.finalized(),fig_size=(12,12),momenta=200,file="sideL_H"+str(H/2)+".png");
    
@@ -104,16 +105,16 @@ pyplot.plot(energy, T_12 ,"r-")
 pyplot.plot(energy, T_12A,"b-")
 pyplot.plot(energy, T_13 ,color="darkorange",linestyle="-")
 pyplot.plot(energy, T_13A,"c-")
-pyplot.plot([-mu_n, -mu_n],[0,max(T_13)],"b:");
 pyplot.plot([-mu_p, -mu_p],[0,max(T_13)],"r:");
+pyplot.plot([-mu_n, -mu_n],[0,max(T_13)],"b:");
 if( supra_ok ):
     pyplot.plot([ Delta, Delta],[0,max(T_13)],"k--");
     pyplot.plot([-Delta,-Delta],[0,max(T_13)],"k--");
 
-pyplot.title("W="+str(W)+", H="+str(H)+", $\mu_{scatt.}$="+str(mu_scattering)+", $\mu_N$="+str(mu_n)+", $\mu_P$="+str(mu_p)+", $\Delta$="+str(Delta),fontsize=18);
+pyplot.title("W="+str(W)+", H="+str(H)+", $s_f$="+str(s_f)+", $\mu_{scatt.}$="+str(mu_scattering)+", $\mu_N$="+str(mu_n)+", $\mu_P$="+str(mu_p)+", $\Delta$="+str(Delta),fontsize=18);
 pyplot.xlabel("$E\;[eV]$",fontsize=18)
 pyplot.ylabel("$T$",fontsize=18)
-pyplot.legend(["$T_{12}$","$T_{12A}$","$T_{13}$","$T_{13A}$","$\mu_N$","$\mu_P$","$\Delta$"],fontsize=18);
+pyplot.legend(["$T_{12}$","$T_{12A}$","$T_{13}$","$T_{13A}$","$\mu_P$","$\mu_N$","$\Delta$"],fontsize=18);
 pyplot.xticks(fontsize=18); pyplot.yticks(fontsize=18);
 pyplot.savefig("T_"+"_".join(sys.argv[1:])+".png");  
 
