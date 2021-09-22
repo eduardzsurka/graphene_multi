@@ -16,15 +16,16 @@ start = time.time()
 
 W             = int(sys.argv[1])
 H             = int(sys.argv[2])
-maxE          = float(sys.argv[3])
-mu_scattering = float(sys.argv[4])
-mu_p          = float(sys.argv[5])
-Delta         = float(sys.argv[6])
-supra_ok      = float(sys.argv[7])
+s_f           = int(sys.argv[3])
+maxE          = float(sys.argv[4])
+mu_scattering = float(sys.argv[5])
+mu_p          = float(sys.argv[6])
+Delta         = float(sys.argv[7])
+supra_ok      = float(sys.argv[8])
 
 mu_n = mu_scattering
 mu_S = 3      
-t    = -3
+t    = -3/s_f
 phi  = np.pi
 
 tau_x = tinyarray.array([[0, 1], [1, 0]])
