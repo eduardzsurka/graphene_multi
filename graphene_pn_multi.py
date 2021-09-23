@@ -24,7 +24,7 @@ Delta         = float(sys.argv[7])
 supra_ok      = float(sys.argv[8])
 
 mu_n = mu_scattering
-mu_S = 3      
+mu_S = 3 
 t    = -3/s_f
 phi  = np.pi
 t_s  = -3
@@ -55,35 +55,35 @@ def create_junction( t, on_site, mu_scattering, mu_n, mu_p, mu_S, Delta ):
             return - mu_scattering  * tau_z
         else:
             return - (mu_p-(mu_p-mu_scattering)*y/lead_height) * tau_z
-    
+
     sys = kwant.Builder(conservation_law=-tau_z, particle_hole = tau_y)
     sys[graphene.shape(square, (0,0))] =  pn_junction
     sys[graphene.neighbors()] = - t * tau_z
 
-    #kwant.plot(sys);        
+    #kwant.plot(sys);
 
     negativeL = kwant.Builder(kwant.TranslationalSymmetry([1 ,0]), conservation_law=-tau_z, particle_hole = tau_y)
     negativeL[graphene.shape(side_leads, (0,H/2))] = ( - mu_n ) * tau_z
     negativeL[graphene.neighbors()] = - t * tau_z
-    
+
     positiveL = kwant.Builder(kwant.TranslationalSymmetry([0 ,-np.sqrt(3)]), conservation_law=-tau_z, particle_hole = tau_y)
     positiveL[graphene.shape(square, (0,H/2))] = ( - mu_p ) * tau_z
     positiveL[graphene.neighbors()] = - t * tau_z
-    
+
     superL = kwant.Builder(kwant.TranslationalSymmetry([0, +np.sqrt(3)]), conservation_law=-tau_z, particle_hole=tau_y)
     superL[graphene.shape(square, (0,0))] = ( - mu_S ) * tau_z + np.exp(phi*1j) * Delta * tau_x
-    superL[graphene.neighbors()] = -t_s * tau_z    
-        
+    superL[graphene.neighbors()] = -t_s * tau_z
+
     #kwant.plotter.bands(negativeL.finalized(),fig_size=(12,12),momenta=200,file="sideL_H"+str(H/2)+".png");
-   
+
     sys.attach_lead(negativeL)
     sys.attach_lead(negativeL.reversed())
     sys.attach_lead(positiveL)
     if( supra_ok ):
         sys.attach_lead(superL)
 
-    kwant.plot(sys,file="sys_W"+str(W)+"_H"+str(H)+"_supra"+str(int(supra_ok))+".png",fig_size=(10,10),dpi=100,site_color="black",show=True);  
-        
+    kwant.plot(sys,file="sys_W"+str(W)+"_H"+str(H)+"_supra"+str(int(supra_ok))+".png",fig_size=(10,10),dpi=100,site_color="black",show=True);
+
     return sys
 
 energy = np.linspace(-maxE, maxE, 1000)
@@ -116,7 +116,7 @@ pyplot.xlabel("$E\;[eV]$",fontsize=18)
 pyplot.ylabel("$T$",fontsize=18)
 pyplot.legend(["$T_{12}$","$T_{12A}$","$T_{13}$","$T_{13A}$","$\mu_P$","$\mu_N$","$\Delta$"],fontsize=18);
 pyplot.xticks(fontsize=18); pyplot.yticks(fontsize=18);
-pyplot.savefig("T_"+"_".join(sys.argv[1:])+".png");  
+pyplot.savefig("T_"+"_".join(sys.argv[1:])+".png");
 
 with open("./T_"+"_".join(sys.argv[1:])+".npy",'wb') as file:
     np.save(file,[energy,T_11,T_11A,T_12,T_12A,T_13,T_13A])
