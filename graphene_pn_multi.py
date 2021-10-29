@@ -35,6 +35,8 @@ tau_x = tinyarray.array([[0, 1], [1, 0]])
 tau_y = tinyarray.array([[0, -1j], [1j, 0]])
 tau_z = tinyarray.array([[1, 0], [0, -1]])
 
+Delta_mat = tinyarray.array([[0, Delta*np.exp(phi*1j)], [Delta*np.exp(-phi*1j) , 0]],complex)
+
 graphene = kwant.lattice.general([[1, 0], [0, np.sqrt(3)]],  # lattice vectors
                                  [[0, 1/(2*np.sqrt(3))], [0, np.sqrt(3)/2], [1/2, 2/(np.sqrt(3))], 
                                   [1/2, 0]],norbs = 2)  # Coordinates of the sites
@@ -72,8 +74,8 @@ def create_junction( t, on_site, mu_scattering, mu_n, mu_p, mu_S, Delta ):
     positiveL[graphene.shape(square, (0,H/2))] = ( - mu_p ) * tau_z
     positiveL[graphene.neighbors()] = - t * tau_z
     
-    superL = kwant.Builder(kwant.TranslationalSymmetry([0, +np.sqrt(3)]), conservation_law=-tau_z, particle_hole=tau_y)
-    superL[graphene.shape(square, (0,0))] = ( - mu_S ) * tau_z + np.exp(phi*1j) * Delta * tau_x
+    superL = kwant.Builder(kwant.TranslationalSymmetry([0, +np.sqrt(3)]))
+    superL[graphene.shape(square, (0,0))] = ( - mu_S ) * tau_z + Delta_mat
     superL[graphene.neighbors()] = - t * tau_z    
         
     #kwant.plotter.bands(negativeL.finalized(),fig_size=(12,12),momenta=200,file="sideL_H"+str(H/2)+".png");
@@ -88,7 +90,7 @@ def create_junction( t, on_site, mu_scattering, mu_n, mu_p, mu_S, Delta ):
         
     return sys
 
-energy = np.linspace(-maxE, maxE, 1000)
+energy = np.linspace(-maxE, maxE, 300)
 junction = create_junction(t=t, on_site = 0, mu_scattering=mu_scattering, mu_n=mu_n, mu_p=mu_p, mu_S=mu_S, Delta=Delta )
 
 T_11, T_11A, T_12, T_12A, T_13, T_13A = [],[],[],[],[],[]
@@ -109,6 +111,7 @@ pyplot.plot(energy, T_13 ,color="darkorange",linestyle="-")
 pyplot.plot(energy, T_13A,"c-")
 pyplot.plot([-mu_p, -mu_p],[0,max(T_13)],"r:");
 pyplot.plot([-mu_n, -mu_n],[0,max(T_13)],"b:");
+pyplot.xlim([-maxE,maxE]);
 if( supra_ok ):
     pyplot.plot([ Delta, Delta],[0,max(T_13)],"k--");
     pyplot.plot([-Delta,-Delta],[0,max(T_13)],"k--");
